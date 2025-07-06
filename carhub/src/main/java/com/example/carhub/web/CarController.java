@@ -12,7 +12,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-//Response Entity is not needed but I placed it to practise
+//Response Entity is not needed but I placed it to practice
 //Cu el fac raspunsuri custom la cereri http
 
 @RestController

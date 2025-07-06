@@ -35,7 +35,7 @@ public class UserService {
     }
 
     public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAllEntities().stream()
+        return userRepository.findAll().stream()
                 .map(this::toUserResponseDto)
                 .collect(Collectors.toList());
     }
@@ -52,8 +52,7 @@ public class UserService {
             .password(hashedPassword)
             .build();
             
-        userRepository.create(createdUser);
-
+        userRepository.save(createdUser);
         return this.toUserResponseDto(createdUser);
     }
 
@@ -66,7 +65,7 @@ public class UserService {
 
     @Transactional
     public UserResponseDto updateUser(Long id, UserRequestDto userRequestDto) {
-        User userEntity = userRepository.getEntityById(id)
+        User userEntity = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException());
 
         String hashedPassword = passwordHasher.hashPassword(userRequestDto.getPassword());
@@ -83,7 +82,7 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long id) {
-        User userEntity = userRepository.getEntityById(id)
+        User userEntity = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException());
 
         userRepository.delete(userEntity);
@@ -91,9 +90,9 @@ public class UserService {
 
     @Transactional
     public UserResponseDto buyCar(Long userId, Long carId) {
-        User buyer = userRepository.getEntityById(userId)
+        User buyer = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException());
-        Car boughtCar = carRepository.getEntityById(carId)
+        Car boughtCar = carRepository.findById(carId)
             .orElseThrow(() -> new EntityNotFoundException());
         
         boughtCar.setOwner(buyer);
@@ -104,7 +103,7 @@ public class UserService {
 
     @Transactional
     public UserResponseDto sellCar(Long userId, Long carId) {
-        Car soldCar = carRepository.getEntityById(carId)
+        Car soldCar = carRepository.findById(carId)
             .orElseThrow(() -> new EntityNotFoundException());
         
         if (!soldCar.getOwner().getId().equals(userId)) {
@@ -112,7 +111,7 @@ public class UserService {
         }
 
         soldCar.setOwner(null);
-        User seller = userRepository.getEntityById(userId)
+        User seller = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException());
         
         soldCar.setOwner(null);

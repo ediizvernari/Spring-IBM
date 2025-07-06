@@ -33,7 +33,7 @@ public class CarService {
     }
 
     public List<CarResponseDto> getAllCars() {
-        List<Car> cars = carRepository.findAllEntities();
+        List<Car> cars = carRepository.findAll();
         
         return cars.stream()
                 .map(this::toCarResponseDto)
@@ -49,7 +49,7 @@ public class CarService {
     }
 
     public CarResponseDto getCarDtoById(Long id) {
-        Car carEntity = carRepository.getEntityById(id)
+        Car carEntity = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
         return toCarResponseDto(carEntity);
     }
@@ -70,7 +70,7 @@ public class CarService {
 
     @Transactional
     public CarResponseDto updateCar(Long id, CarRequestDto carDto) {
-        Car carEntity = carRepository.getEntityById(id)
+        Car carEntity = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
         
         carEntity.setMake(carDto.getMake());
@@ -84,7 +84,7 @@ public class CarService {
 
     @Transactional
     public void deleteCar(Long id) {
-        Car carEntity = carRepository.getEntityById(id)
+        Car carEntity = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
         
         carRepository.delete(carEntity);
