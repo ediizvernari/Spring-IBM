@@ -2,6 +2,7 @@ package com.example.carhub.service;
 
 import com.example.carhub.domain.User;
 import com.example.carhub.domain.Car;
+import com.example.carhub.dto.CarResponseDto;
 import com.example.carhub.dto.UserRequestDto;
 import com.example.carhub.dto.UserResponseDto;
 import com.example.carhub.repository.UserRepository;
@@ -26,11 +27,13 @@ public class UserService {
     private final EmailHasher emailHasher;
 
     private UserResponseDto toUserResponseDto(User user) {
+        List<CarResponseDto> ownedCars = carService.getAllCarsByOwnerId((user.getId()));
+
         return UserResponseDto.builder()
             .id(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
-            .ownedCars(carService.getAllCarsByOwnerId(user.getId()))
+            .ownedCars(ownedCars)
             .build();
     }
 
