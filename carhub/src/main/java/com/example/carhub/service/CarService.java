@@ -18,8 +18,13 @@ public class CarService {
     private final CarRepository carRepository;
 
     private CarResponseDto toCarResponseDto(Car car) {
+        Long ownerId = (car.getOwner() != null)
+            ? car.getOwner().getId()
+            : null;
+
         return CarResponseDto.builder()
             .id(car.getId())
+            .ownerId(ownerId)
             .make(car.getMake())
             .model(car.getModel())
             .year(car.getProductionYear())
@@ -29,9 +34,18 @@ public class CarService {
 
     public List<CarResponseDto> getAllCars() {
         List<Car> cars = carRepository.findAllEntities();
+        
         return cars.stream()
                 .map(this::toCarResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<CarResponseDto> getAllCarsByOwnerId(Long ownerId) {
+        List<Car> cars = carRepository.findAllByOwnerId(ownerId);
+
+        return cars.stream()
+            .map(this::toCarResponseDto)
+            .collect(Collectors.toList());
     }
 
     public CarResponseDto getCarDtoById(Long id) {
@@ -43,6 +57,7 @@ public class CarService {
     @Transactional
     public CarResponseDto createCar(CarRequestDto carRequestDto) {
         Car car = Car.builder()
+            .owner(null)
             .make(carRequestDto.getMake())
             .model(carRequestDto.getModel())
             .productionYear(carRequestDto.getYear())

@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @Builder
 public class UserResponseDto {
@@ -15,4 +17,6 @@ public class UserResponseDto {
     @Email
     @NotBlank
     private String email;
+
+    private List<CarResponseDto> ownedCars;
 }

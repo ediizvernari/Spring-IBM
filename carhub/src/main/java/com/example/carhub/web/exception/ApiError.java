@@ -4,8 +4,9 @@ import lombok.*;
 import java.time.Instant;
 import java.util.List;
 
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@Builder
+@NoArgsConstructor @AllArgsConstructor
 public class ApiError {
     private Instant timestamp;
     private int status;

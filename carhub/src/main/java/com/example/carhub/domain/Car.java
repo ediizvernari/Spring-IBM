@@ -7,8 +7,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "cars")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -28,4 +27,8 @@ public class Car {
     
     @NotNull
     private double price;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "user_id")
+    private User owner;
 }

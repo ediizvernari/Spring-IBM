@@ -8,7 +8,8 @@ import lombok.*;
 @Builder
 public class CarResponseDto {
     private Long id;
-    
+    private Long ownerId;
+
     @NotBlank
     private String make;
     

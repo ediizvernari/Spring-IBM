@@ -1,9 +1,11 @@
 package com.example.carhub.service;
 
 import com.example.carhub.domain.User;
+import com.example.carhub.domain.Car;
 import com.example.carhub.dto.UserRequestDto;
 import com.example.carhub.dto.UserResponseDto;
 import com.example.carhub.repository.UserRepository;
+import com.example.carhub.repository.CarRepository;
 import com.example.carhub.security.*;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final CarRepository carRepository;
+    private final CarService carService;
     private final PasswordHasher passwordHasher;
     private final EmailHasher emailHasher;
 
@@ -26,6 +30,7 @@ public class UserService {
             .id(user.getId())
             .username(user.getUsername())
             .email(user.getEmail())
+            .ownedCars(carService.getAllCarsByOwnerId(user.getId()))
             .build();
     }
 
@@ -82,5 +87,37 @@ public class UserService {
             .orElseThrow(() -> new EntityNotFoundException());
 
         userRepository.delete(userEntity);
+    }
+
+    @Transactional
+    public UserResponseDto buyCar(Long userId, Long carId) {
+        User buyer = userRepository.getEntityById(userId)
+            .orElseThrow(() -> new EntityNotFoundException());
+        Car boughtCar = carRepository.getEntityById(carId)
+            .orElseThrow(() -> new EntityNotFoundException());
+        
+        boughtCar.setOwner(buyer);
+        carRepository.save(boughtCar);
+
+        return this.toUserResponseDto(buyer);
+    }
+
+    @Transactional
+    public UserResponseDto sellCar(Long userId, Long carId) {
+        Car soldCar = carRepository.getEntityById(carId)
+            .orElseThrow(() -> new EntityNotFoundException());
+        
+        if (!soldCar.getOwner().getId().equals(userId)) {
+            throw new EntityNotFoundException();
+        }
+
+        soldCar.setOwner(null);
+        User seller = userRepository.getEntityById(userId)
+            .orElseThrow(() -> new EntityNotFoundException());
+        
+        soldCar.setOwner(null);
+        carRepository.save(soldCar);
+        
+        return this.toUserResponseDto(seller);
     }
 }
