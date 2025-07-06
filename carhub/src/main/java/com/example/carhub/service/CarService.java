@@ -1,7 +1,8 @@
 package com.example.carhub.service;
 
 import com.example.carhub.domain.Car;
-import com.example.carhub.dto.CarDto;
+import com.example.carhub.dto.CarRequestDto;
+import com.example.carhub.dto.CarResponseDto;
 import com.example.carhub.repository.CarRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -16,47 +17,44 @@ import java.util.stream.Collectors;
 public class CarService {
     private final CarRepository carRepository;
 
-    private CarDto carToDto(Car car) {
-        return CarDto.builder()
-                .id(car.getId())
-                .make(car.getMake())
-                .model(car.getModel())
-                .year(car.getProductionYear())
-                .price(car.getPrice())
-                .build();
+    private CarResponseDto toCarResponseDto(Car car) {
+        return CarResponseDto.builder()
+            .id(car.getId())
+            .make(car.getMake())
+            .model(car.getModel())
+            .year(car.getProductionYear())
+            .price(car.getPrice())
+            .build();
     }
 
-    private Car dtoToCar(CarDto carDto) {
-        return Car.builder()
-                .id(carDto.getId())
-                .make(carDto.getMake())
-                .model(carDto.getModel())
-                .productionYear(carDto.getYear())
-                .price(carDto.getPrice())
-                .build();
-    }
-
-    public List<CarDto> getAllCars() {
+    public List<CarResponseDto> getAllCars() {
         List<Car> cars = carRepository.findAllEntities();
         return cars.stream()
-                .map(this::carToDto)
+                .map(this::toCarResponseDto)
                 .collect(Collectors.toList());
     }
 
-    public CarDto getCarDtoById(Long id) {
+    public CarResponseDto getCarDtoById(Long id) {
         Car carEntity = carRepository.getEntityById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
-        return carToDto(carEntity);
+        return toCarResponseDto(carEntity);
     }
 
     @Transactional
-    public CarDto createCar(CarDto carDto) {
-        Car car = carRepository.create(dtoToCar(carDto));
-        return this.carToDto(car);
+    public CarResponseDto createCar(CarRequestDto carRequestDto) {
+        Car car = Car.builder()
+            .make(carRequestDto.getMake())
+            .model(carRequestDto.getModel())
+            .productionYear(carRequestDto.getYear())
+            .price(carRequestDto.getPrice())
+            .build();
+
+        this.carRepository.save(car);
+        return this.toCarResponseDto(car);
     }
 
     @Transactional
-    public CarDto updateCar(Long id, CarDto carDto) {
+    public CarResponseDto updateCar(Long id, CarRequestDto carDto) {
         Car carEntity = carRepository.getEntityById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
         
@@ -66,7 +64,7 @@ public class CarService {
         carEntity.setPrice(carDto.getPrice());
 
         Car savedCar = carRepository.save(carEntity);
-        return this.carToDto(savedCar); 
+        return this.toCarResponseDto(savedCar); 
     }
 
     @Transactional

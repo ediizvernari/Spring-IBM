@@ -3,17 +3,18 @@ package com.example.carhub.dto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+@Data
 @Builder
-@Getter @Setter
-@AllArgsConstructor @NoArgsConstructor
-public class CarDto {
-    private Long id;
+public class CarRequestDto {    
     @NotBlank
     private String make;
+    
     @NotBlank
     private String model;
+    
     @NotNull
     private int year;
+    
     @NotNull
     private double price;
 }

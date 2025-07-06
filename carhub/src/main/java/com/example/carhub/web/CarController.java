@@ -1,6 +1,7 @@
 package com.example.carhub.web;
 
-import com.example.carhub.dto.CarDto;
+import com.example.carhub.dto.CarRequestDto;
+import com.example.carhub.dto.CarResponseDto;
 import com.example.carhub.service.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,23 +21,23 @@ public class CarController {
     private final CarService carService;
     
     @GetMapping
-    public List<CarDto> getAllCars() {
+    public List<CarResponseDto> getAllCars() {
         return carService.getAllCars();
     }
 
     @GetMapping("/{id}")
-    public CarDto getById(@PathVariable Long id) {
+    public CarResponseDto getById(@PathVariable Long id) {
         return carService.getCarDtoById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CarDto create(@Valid @RequestBody CarDto carDto) {
+    public CarResponseDto create(@Valid @RequestBody CarRequestDto carDto) {
         return carService.createCar(carDto);
     }
 
     @PutMapping("/{id}")
-    public CarDto update(@PathVariable Long id, @Valid @RequestBody CarDto carDto) {
+    public CarResponseDto update(@PathVariable Long id, @Valid @RequestBody CarRequestDto carDto) {
         return carService.updateCar(id, carDto);
     }
 

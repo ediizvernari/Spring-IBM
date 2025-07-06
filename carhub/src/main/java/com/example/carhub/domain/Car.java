@@ -16,12 +16,16 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     @NotBlank
     private String make;
+    
     @NotBlank
     private String model;
+    
     @NotNull
     private int productionYear;
+    
     @NotNull
     private double price;
 }

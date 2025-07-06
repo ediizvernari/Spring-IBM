@@ -25,5 +25,8 @@ public class User {
     private String email;
 
     @NotBlank
+    private String emailLookup;
+
+    @NotBlank
     private String password;
 }
