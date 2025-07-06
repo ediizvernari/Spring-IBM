@@ -5,6 +5,8 @@ import com.example.carhub.domain.Car;
 import com.example.carhub.dto.CarResponseDto;
 import com.example.carhub.dto.UserRequestDto;
 import com.example.carhub.dto.UserResponseDto;
+import com.example.carhub.mapper.CarMapper;
+import com.example.carhub.mapper.UserMapper;
 import com.example.carhub.repository.UserRepository;
 import com.example.carhub.repository.CarRepository;
 import com.example.carhub.security.*;
@@ -22,24 +24,19 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final CarRepository carRepository;
-    private final CarService carService;
     private final PasswordHasher passwordHasher;
     private final EmailHasher emailHasher;
 
-    private UserResponseDto toUserResponseDto(User user) {
-        List<CarResponseDto> ownedCars = carService.getAllCarsByOwnerId((user.getId()));
-
-        return UserResponseDto.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .ownedCars(ownedCars)
-            .build();
+    private UserResponseDto mapEntityToDto(User user) {
+        List<CarResponseDto> ownedCars = carRepository.findAllByOwnerId(user.getId()).stream()
+            .map(CarMapper::toCarResponseDto)
+            .collect(Collectors.toList());
+        return UserMapper.toUserResponseDto(user, ownedCars);
     }
 
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(this::toUserResponseDto)
+                .map(this::mapEntityToDto)
                 .collect(Collectors.toList());
     }
 
@@ -56,31 +53,26 @@ public class UserService {
             .build();
             
         userRepository.save(createdUser);
-        return this.toUserResponseDto(createdUser);
+        return UserMapper.toUserResponseDto(createdUser, null);
     }
 
     public UserResponseDto getUserById(Long id) { 
         User foundUser = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException());
         
-        return this.toUserResponseDto(foundUser);
+        return this.mapEntityToDto(foundUser);
     }
 
     @Transactional
     public UserResponseDto updateUser(Long id, UserRequestDto userRequestDto) {
-        User userEntity = userRepository.findById(id)
+        User userToBeUpdated = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException());
 
         String hashedPassword = passwordHasher.hashPassword(userRequestDto.getPassword());
         String emailLookup = emailHasher.signEmail(userRequestDto.getEmail());
 
-        userEntity.setUsername(userRequestDto.getUsername());
-        userEntity.setPassword(hashedPassword);
-        userEntity.setEmail(userRequestDto.getEmail());
-        userEntity.setEmailLookup(emailLookup);
-        
-        User updatedUser = userRepository.save(userEntity);
-        return this.toUserResponseDto(updatedUser);
+        UserMapper.updateUserEntity(userToBeUpdated, userRequestDto, hashedPassword, emailLookup);
+        return this.mapEntityToDto(userToBeUpdated);
     }
 
     @Transactional
@@ -101,7 +93,7 @@ public class UserService {
         boughtCar.setOwner(buyer);
         carRepository.save(boughtCar);
 
-        return this.toUserResponseDto(buyer);
+        return this.mapEntityToDto(buyer);
     }
 
     @Transactional
@@ -120,6 +112,6 @@ public class UserService {
         soldCar.setOwner(null);
         carRepository.save(soldCar);
         
-        return this.toUserResponseDto(seller);
+        return this.mapEntityToDto(seller);
     }
 }
